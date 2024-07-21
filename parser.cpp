@@ -34,7 +34,7 @@ void SpiceParser::run() {
     if (!tk)
       continue;
     for (i = 0; i < ARRAY_SIZE(charTypeTable); ++i) {
-      if (tk[0] == charTypeTable[i].c) {
+      if (std::tolower(tk[0]) == charTypeTable[i].c) {
         type = charTypeTable[i].type;
         break;
       }

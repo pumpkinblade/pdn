@@ -11,17 +11,17 @@
 #define ANSI_NONE "\33[0m"
 
 #define LOG_ERROR(fmt, ...)                                                    \
-  printf(ANSI_FG_RED "ERROR: [%s:%d]" fmt ANSI_NONE, __FILE__, __LINE__,       \
+  printf(ANSI_FG_RED "ERROR: [%s:%d] " fmt ANSI_NONE "\n", __FILE__, __LINE__, \
          ##__VA_ARGS__)
 #define LOG_WARN(fmt, ...)                                                     \
-  printf(ANSI_FG_YELLOW "WARN: [%s:%d]" fmt ANSI_NONE, __FILE__, __LINE__,     \
-         ##__VA_ARGS__)
+  printf(ANSI_FG_YELLOW "WARN: [%s:%d] " fmt ANSI_NONE "\n", __FILE__,         \
+         __LINE__, ##__VA_ARGS__)
 #define LOG_INFO(fmt, ...)                                                     \
-  printf(ANSI_FG_GREEN "INFO: [%s:%d]" fmt ANSI_NONE, __FILE__, __LINE__,      \
-         ##__VA_ARGS__)
+  printf(ANSI_FG_GREEN "INFO: [%s:%d] " fmt ANSI_NONE "\n", __FILE__,          \
+         __LINE__, ##__VA_ARGS__)
 #define LOG_TRACE(fmt, ...)                                                    \
-  printf(ANSI_FG_BLUE "TRACE: [%s:%d]" fmt ANSI_NONE, __FILE__, __LINE__,      \
-         ##__VA_ARGS__)
+  printf(ANSI_FG_BLUE "TRACE: [%s:%d] " fmt ANSI_NONE "\n", __FILE__,          \
+         __LINE__, ##__VA_ARGS__)
 
 #define ASSERT(x, fmt, ...)                                                    \
   do {                                                                         \
@@ -31,6 +31,5 @@
     }                                                                          \
   } while (0)
 #define PANIC(fmt, ...) ASSERT(0, fmt, ##__VA_ARGS__)
-#define TODO() PANIC("Implement Me!!!");
 
 #endif
