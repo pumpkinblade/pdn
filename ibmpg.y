@@ -1,8 +1,10 @@
 %{
 
-#include "IbmpgCircuit.hpp"
+#include "IbmpgParser.hpp"
+#include <regex>
+#include <string>
 
-extern IbmpgCircuit *g_ckt;
+extern IbmpgParser *pg;
 
 int yylex(void);
 void yyerror(const char *s);
@@ -20,13 +22,13 @@ void yyerror(const char *s);
 %type<value> value
 %type<str> op end
 %type<str> resistor isource vsource
-%type<str> command branch comment
+%type<str> command component comment
 %type<str> line lines
 
 %union {
-	char *str;
-	int num;
-	double value;
+  char *str;
+  int num;
+  double value;
 }
 
 %%
@@ -37,7 +39,7 @@ lines
 ;
 
 line
-: branch EOL {}
+: component EOL {}
 | command EOL {}
 | EOL {}
 | comment {}
@@ -48,26 +50,26 @@ command
 | end
 ;
 
-branch
+component
 : resistor
 | vsource
 | isource
 ;
 
 resistor
-: P_RESISTOR node node value { g_ckt->makeBranch($1, $2, $3, $4); }
+: P_RESISTOR node node value { pg->makeComponent($1, $2, $3, $4); }
 ;
 
 vsource
-: P_VSOURCE node node value { g_ckt->makeBranch($1, $2, $3, $4); }
+: P_VSOURCE node node value { pg->makeComponent($1, $2, $3, $4); }
 ;
 
 isource
-: P_ISOURCE node node value { g_ckt->makeBranch($1, $2, $3, $4); }
+: P_ISOURCE node node value { pg->makeComponent($1, $2, $3, $4); }
 ;
 
 comment
-: COMMENTLINE { g_ckt->makeComment($1); }
+: COMMENTLINE { pg->makeComment($1); }
 ;
 
 op

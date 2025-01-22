@@ -1,4 +1,5 @@
-#include "IbmpgCircuit.hpp"
+#include "IbmpgParser.hpp"
+#include "PowerGrid.hpp"
 #include <CLI/CLI.hpp>
 
 int main(int argc, char *argv[]) {
@@ -7,8 +8,10 @@ int main(int argc, char *argv[]) {
   app.add_option("-i,--input", netlist_file, "ibmpg spice netlist")->required();
   CLI11_PARSE(app, argc, argv);
 
-  IbmpgCircuit ckt;
-  ckt.readNetlist(netlist_file);
-  ckt.report();
+  IbmpgParser parser(netlist_file);
+  PowerGridDesc desc;
+  parser.extractPowerGrid(desc);
+  PowerGrid grid(desc);
+  grid.report();
   return 0;
 }

@@ -1,53 +1,38 @@
-%option noyywrap
+%option noyywrap nounput
 
 %{
 
 #include <cctype>
-#include "ibmpg_parser.hpp"
+#include "ibmpg.tab.hpp"
 
 double parseValue(const char *str);
 
 %}
 
-ALPHA    [_A-Za-z]
-DIGIT    [0-9]
-ALPHANUM [_A-Za-z0-9]
-STRING   {ALPHANUM}+
-INTEGER  {DIGIT}+
-REAL     [\-\+]?([0-9]*\.?[0-9]+|[0-9]+\.)([Ee](\+|\-)?[0-9]+)?
-
-EOL         \n
-BLANK       [ \t\r]+
-S_UNIT      [Ff]|[Pp]|[Nn]|[Uu]|[Mm]|[Kk]|[Mm]|[Xx]|[Gg]|[Tt]|[Mm][Ee][Gg]
-VALUE       ({REAL}|[\-]?{INTEGER}){S_UNIT}
-COMMENTLINE \*.*\n
-
-P_RESISTOR [r|R]{STRING}
-P_VSOURCE  [v|V]{STRING}
-P_ISOURCE  [i|I]{STRING}
-
-CMD_OP  \.[Oo][Pp]
-CMD_END \.[Ee][Nn][Dd]
+INTEGER [0-9]+
+REAL    [\-\+]?([0-9]*\.?[0-9]+|[0-9]+\.)([Ee](\+|\-)?[0-9]+)?
+S_UNIT  [Ff]|[Pp]|[Nn]|[Uu]|[Mm]|[Kk]|[Mm]|[Xx]|[Gg]|[Tt]|[Mm][Ee][Gg]
+VALUE   ({REAL}|[\-]?{INTEGER}){S_UNIT}
 
 %%
 
-{INTEGER} { yylval.num = atoi(yytext); return INTEGER; }
-{REAL}    { yylval.value = atof(yytext); return REAL; }
-{VALUE}   { yylval.value = parseValue(yytext); return REAL; }
+{INTEGER}+ { yylval.num = atoi(yytext); return INTEGER; }
+{REAL}     { yylval.value = atof(yytext); return REAL; }
+{VALUE}    { yylval.value = parseValue(yytext); return REAL; }
 
-{EOL}         { return EOL; }
-{COMMENTLINE} { yylval.str = strdup(yytext); return COMMENTLINE; }
+[rR][a-zA-Z0-9_]+ { yylval.str = strdup(yytext); return P_RESISTOR; }
+[vV][a-zA-Z0-9_]+ { yylval.str = strdup(yytext); return P_VSOURCE; }
+[iI][a-zA-Z0-9_]+ { yylval.str = strdup(yytext); return P_ISOURCE; }
 
-{P_RESISTOR} { yylval.str = strdup(yytext); return P_RESISTOR; }
-{P_VSOURCE}  { yylval.str = strdup(yytext); return P_VSOURCE; }
-{P_ISOURCE}  { yylval.str = strdup(yytext); return P_ISOURCE; }
+\.[Oo][Pp]     { return CMD_OP; }
+\.[Ee][Nn][Dd] { return CMD_END; }
 
-{CMD_OP}  { return CMD_OP; }
-{CMD_END} { return CMD_END; }
+[a-zA-Z_][a-zA-Z0-9_]* { yylval.str = strdup(yytext);  return STRING; }
 
-{STRING} { yylval.str = strdup(yytext);  return STRING; }
-{BLANK}  {}
-.        { return YYerror; }
+\*.*\n  { yylval.str = strdup(yytext); return COMMENTLINE; }
+\n      { return EOL; }
+[ \t\r] {}
+.       { return YYerror; }
 
 %%
 

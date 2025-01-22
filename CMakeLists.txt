@@ -11,21 +11,30 @@ find_package(fmt REQUIRED)
 
 flex_target(ibmpg_lexer
   ibmpg.l
-  ${CMAKE_CURRENT_BINARY_DIR}/ibmpg_lexer.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/ibmpg.lex.cpp
 )
 
 bison_target(ibmpg_parser
   ibmpg.y
-  ${CMAKE_CURRENT_BINARY_DIR}/ibmpg_parser.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/ibmpg.tab.cpp
 )
 
 add_executable(pdn 
   main.cpp
-  Circuit.cpp
-  IbmpgCircuit.cpp
-  Branch.cpp
+  IbmpgParser.cpp
+  PowerGrid.cpp
   ${FLEX_ibmpg_lexer_OUTPUTS}
   ${BISON_ibmpg_parser_OUTPUTS}
+)
+
+target_compile_options(pdn PRIVATE
+  -Wall
+  -Wextra
+  -Wmissing-field-initializers
+  -Wredundant-decls
+  -Wformat-security
+  -Wno-sign-compare
+  -Wp,-D_GLIBCXX_ASSERTIONS
 )
 
 target_include_directories(pdn PRIVATE ${CMAKE_SOURCE_DIR})
