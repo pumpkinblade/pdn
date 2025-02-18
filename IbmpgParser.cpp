@@ -119,10 +119,11 @@ void IbmpgParser::extractPowerGrid(PowerGridDesc &grid_desc) {
   std::vector<int> points_y(point_set_y.begin(), point_set_y.end());
   std::sort(points_x.begin(), points_x.end());
   std::sort(points_y.begin(), points_y.end());
-  // fmt::println("[{}, {}] x [{}, {}]", points_x.front(), points_x.back(),
-  //              points_y.front(), points_y.back());
-  // fmt::println("size = {} x {} = {}", points_x.size(), points_y.size(),
-  //              points_x.size() * points_y.size());
+  fmt::println("[{}, {}] x [{}, {}]", points_x.front(), points_x.back(),
+               points_y.front(), points_y.back());
+  fmt::println("size = {} x {} = {}", points_x.size(), points_y.size(),
+               points_x.size() * points_y.size());
+  exit(0);
 
   grid_desc.grid.start_x = points_x.front();
   grid_desc.grid.start_y = points_y.front();

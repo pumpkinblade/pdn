@@ -1,0 +1,23 @@
+[terra@LAPTOP-2TBHQKMI ~/repos/pdn]$ ./build/pdn -i ./ibmpg/dc/spice/ibmpg0.spice 
+[0, 150] x [0, 150]
+size = 4 x 4 = 16
+[terra@LAPTOP-2TBHQKMI ~/repos/pdn]$ ./build/pdn -i ./ibmpg/dc/spice/ibmpg1.spice 
+[333, 20771] x [215, 20984]
+size = 46 x 350 = 16100
+[terra@LAPTOP-2TBHQKMI ~/repos/pdn]$ ./build/pdn -i ./ibmpg/dc/spice/ibmpg2.spice 
+[8, 8120] x [30, 8166]
+size = 201 x 129 = 25929
+[terra@LAPTOP-2TBHQKMI ~/repos/pdn]$ ./build/pdn -i ./ibmpg/dc/spice/ibmpg3.spice 
+[13500, 30599100] x [60300, 30710700]
+size = 5160 x 584 = 3013440
+[terra@LAPTOP-2TBHQKMI ~/repos/pdn]$ ./build/pdn -i ./ibmpg/dc/spice/ibmpg4.spice 
+[8, 13640] x [35, 13739]
+size = 835 x 680 = 567800
+[terra@LAPTOP-2TBHQKMI ~/repos/pdn]$ ./build/pdn -i ./ibmpg/dc/spice/ibmpg5.spice 
+[7, 21247] x [8, 21248]
+size = 563 x 520 = 292760
+[terra@LAPTOP-2TBHQKMI ~/repos/pdn]$ ./build/pdn -i ./ibmpg/dc/spice/ibmpg6.spice 
+[16800, 10182480] x [22960, 10226720]
+size = 3278 x 700 = 2294600
+
+pluse(low_v high_v delay rise fall on period)
