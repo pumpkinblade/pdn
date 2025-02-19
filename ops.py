@@ -1,14 +1,11 @@
-import networkx as nx
 import numpy as np
-import scipy
 import torch
-from enum import IntEnum
 from circuit import OpBranchType, OpCircuit
 
 
 class OpSolveFunction(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, can, excitation, can_index, vol_obs_index, cur_obs_index, ckt):
+    def forward(ctx, can, can_index, exc, exc_index, vol_obs_index, cur_obs_index, ckt):
         """ "
         @brief forward
         @param ctx
@@ -18,9 +15,12 @@ class OpSolveFunction(torch.autograd.Function):
         """
 
         # update branches value
+        ckt.alter(
+            ckt.excitcation_index(),
+            np.zeros_like(ckt.excitcation_index(), dtype=np.float32),
+        )
         ckt.alter(can_index, can.numpy())
-        exc_index = ckt.excitcation_index()
-        ckt.alter(exc_index, excitation)
+        ckt.alter(exc_index, exc)
 
         # solve .op
         ckt.solve_op()
@@ -50,8 +50,10 @@ class OpSolveFunction(torch.autograd.Function):
         ckt = ctx.ckt
 
         # clear all the original excitcation
-        exc_index = ckt.excitcation_index()
-        ckt.alter(exc_index, np.zeros_like(exc_index, dtype=np.float32))
+        ckt.alter(
+            ckt.excitcation_index(),
+            np.zeros_like(ckt.excitcation_index(), dtype=np.float32),
+        )
 
         # set grad as excitation
         ckt.alter(vol_obs_index, vol_grad.numpy())
@@ -65,6 +67,7 @@ class OpSolveFunction(torch.autograd.Function):
 
         return (
             torch.from_numpy(grad),
+            None,
             None,
             None,
             None,

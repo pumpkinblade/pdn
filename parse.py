@@ -6,7 +6,7 @@ from circuit import OpBranchType, OpCircuit
 
 def networkx_from_spice(file: str) -> nx.MultiDiGraph:
     def str_to_float(value_str: str):
-        map = {
+        unit_map = {
             "f": 1e-15,
             "p": 1e-12,
             "n": 1e-9,
@@ -18,7 +18,7 @@ def networkx_from_spice(file: str) -> nx.MultiDiGraph:
             "t": 1e12,
         }
         value = 1
-        for k, v in map.items():
+        for k, v in unit_map.items():
             if value_str[-len(k) :].lower() == k:
                 value_str = value_str[: -len(k)]
                 value = v
@@ -61,6 +61,10 @@ def networkx_from_spice(file: str) -> nx.MultiDiGraph:
                 else:
                     graph.add_edge(node1_name, node2_name, key=branch_name, value=value)
 
+    return graph
+
+
+def process_openroad(graph: nx.MultiDiGraph) -> None:
     # remove conductance connected to ITerm
     edges_to_remove = []
     for u, v, k in graph.edges(keys=True):
@@ -81,43 +85,36 @@ def networkx_from_spice(file: str) -> nx.MultiDiGraph:
 
     # add additional resistor between voltage source and node
     edges_to_insert = []
-    for u, v, k in graph.edges(keys=True):
+    for u, v, k, val in graph.edges(keys=True, data="value"):
         if k[0] == "v":
-            edges_to_insert.append((u, v, k))
-    for i, (u, v, k) in enumerate(edges_to_insert):
+            edges_to_insert.append((u, v, k, val))
+    for i, (u, v, k, val) in enumerate(edges_to_insert):
         # u is node, v is gnd
         x = "x_" + u
-        k = "gx{}".format(i)
         graph.add_node(x)
-        graph.add_edge(u, x, key=k, value=1000.0)
-        for _, neighbor, key, data in list(graph.edges(u, data=True, keys=True)):
-            graph.add_edge(x, neighbor, key=key, **data)
-            graph.remove_edge(u, neighbor, key)
-        for neighbor, _, key, data in list(graph.in_edges(u, data=True, keys=True)):
-            graph.add_edge(neighbor, x, key=key, **data)
-            graph.remove_edge(neighbor, u, key)
-
-    return graph
+        kux = "gx{}".format(i)
+        graph.add_edge(u, x, key=kux, value=10.0)
+        graph.add_edge(x, v, key=k, value=val)
+        graph.remove_edge(u, v, key=k)
 
 
 def opcircuit_from_networkx(graph: nx.MultiDiGraph) -> OpCircuit:
     # assign number to each node
-    node_id = 0
+    node_id = 1
     node_map = {"0": 0}
-    node_name = []
     for n in graph.nodes:
         if n == "0":
             continue
         node_map[n] = node_id
         node_id += 1
-        node_name.append(n)
+    node_name = np.array(list(node_map.keys()), dtype=str)
 
     # assign number to each branch
     branch_u = np.empty(graph.number_of_edges(), dtype=np.int64)
     branch_v = np.empty(graph.number_of_edges(), dtype=np.int64)
     branch_type = np.empty(graph.number_of_edges(), dtype=OpBranchType)
     branch_value = np.empty(graph.number_of_edges(), dtype=np.float32)
-    branch_name = []
+    branch_name = [None] * graph.number_of_edges()
     for i, (u, v, k, val) in enumerate(graph.edges(keys=True, data="value")):
         branch_u[i] = node_map[u]
         branch_v[i] = node_map[v]
@@ -128,7 +125,14 @@ def opcircuit_from_networkx(graph: nx.MultiDiGraph) -> OpCircuit:
         if k[0] == "g":
             branch_type[i] = OpBranchType.G
         branch_value[i] = val
-        branch_name.append(k)
+        branch_name[i] = k
+    order = np.argsort(branch_type)
+    branch_u = branch_u[order]
+    branch_v = branch_v[order]
+    branch_type = branch_type[order]
+    branch_value = branch_value[order]
+    branch_name = np.array(branch_name)[order]
+
     return OpCircuit(
         node_name, branch_name, branch_u, branch_v, branch_type, branch_value
     )
@@ -163,12 +167,19 @@ def get_cur_obs_index(ckt: OpCircuit):
 if __name__ == "__main__":
     file = "draft7.sp"
     graph = networkx_from_spice(file)
+    # process_openroad(graph)
     ckt = opcircuit_from_networkx(graph)
     can_index = get_can_index(ckt)
     vol_obs_index = get_vol_obs_index(ckt)
     cur_obs_index = get_cur_obs_index(ckt)
 
-    print(ckt.branch_u)
-    print(ckt.branch_v)
-    print(ckt.branch_type)
-    print(ckt.branch_value)
+    # for t, u, v, val in zip(
+    #     ckt.branch_type, ckt.branch_u, ckt.branch_v, ckt.branch_value
+    # ):
+    #     print("{} {} {} {}".format(OpBranchType(t).name, u, v, val))
+    print(ckt.J)
+    print(ckt.G.todense())
+    ckt.solve()
+    print(ckt.V)
+    # print(ckt.branch_current(vol_obs_index))
+    print(ckt.branch_voltage(cur_obs_index))
