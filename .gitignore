@@ -2,3 +2,5 @@
 .vscode
 build
 ibmpg
+__pycache__
+.ropeproject
