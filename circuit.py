@@ -70,7 +70,9 @@ class OpCircuit(object):
         # update voltage branch
         V_index = index[self.branch_type[index] == OpBranchType.V]
         V_value = value[self.branch_type[index] == OpBranchType.V]
-        V_line_index = np.array(list(map(self.voltage_line_map.get, V_index)))
+        V_line_index = np.array(
+            list(map(self.voltage_line_map.get, V_index)), dtype=np.int64
+        )
         self.J[V_line_index] = V_value
         if len(V_line_index) > 0:
             self.V = None
@@ -179,15 +181,17 @@ class OpCircuit(object):
             (self.branch_type == OpBranchType.V) | (self.branch_type == OpBranchType.I)
         )[0]
 
+    def excitcation_value(self) -> np.ndarray:
+        return self.branch_value[
+            (self.branch_type == OpBranchType.V) | (self.branch_type == OpBranchType.I)
+        ]
+
     def branch_current(self, index: np.ndarray) -> np.ndarray:
         V_index_mask = self.branch_type[index] == OpBranchType.V
         V_index = index[V_index_mask]
-        V_line_index = np.fromfunction(
-            lambda x: self.voltage_line_map[V_index[x]],
-            index.shape,
-            dtype=np.int64,
+        V_line_index = np.array(
+            list(map(lambda i: self.voltage_line_map[i], V_index)), dtype=np.int64
         )
-
         V_current = self.V[V_line_index]
 
         I_index_mask = self.branch_type[index] == OpBranchType.I
@@ -208,7 +212,7 @@ class OpCircuit(object):
         u = self.branch_u[index] - 1
         v = self.branch_v[index] - 1
         voltage_u = np.zeros_like(index, dtype=np.float32)
-        voltage_u[u >= 0] = self.J[u[u >= 0]]
+        voltage_u[u >= 0] = self.V[u[u >= 0]]
         voltage_v = np.zeros_like(index, dtype=np.float32)
-        voltage_v[v >= 0] = self.J[v[v >= 0]]
+        voltage_v[v >= 0] = self.V[v[v >= 0]]
         return voltage_u - voltage_v
