@@ -66,22 +66,22 @@ def networkx_from_spice(file: str) -> nx.MultiDiGraph:
 
 def process_openroad(graph: nx.MultiDiGraph) -> None:
     # remove conductance connected to ITerm
-    edges_to_remove = []
-    for u, v, k in graph.edges(keys=True):
-        if k[0] == "g" and (
-            re.search("ITerm", u, re.IGNORECASE) is not None
-            or re.search("ITerm", v, re.IGNORECASE) is not None
-        ):
-            edges_to_remove.append((u, v, k))
-    for u, v, k in edges_to_remove:
-        graph.remove_edge(u, v, k)
-        if re.search("ITerm", u, re.IGNORECASE) is not None:
-            u, v = v, u
-        for _, neighbor, key, data in list(graph.edges(v, data=True, keys=True)):
-            graph.add_edge(u, neighbor, key=key, **data)
-        for neighbor, _, key, data in list(graph.in_edges(v, data=True, keys=True)):
-            graph.add_edge(neighbor, u, key=key, **data)
-        graph.remove_node(v)
+    # edges_to_remove = []
+    # for u, v, k in graph.edges(keys=True):
+    #     if k[0] == "g" and (
+    #         re.search("ITerm", u, re.IGNORECASE) is not None
+    #         or re.search("ITerm", v, re.IGNORECASE) is not None
+    #     ):
+    #         edges_to_remove.append((u, v, k))
+    # for u, v, k in edges_to_remove:
+    #     graph.remove_edge(u, v, k)
+    #     if re.search("ITerm", u, re.IGNORECASE) is not None:
+    #         u, v = v, u
+    #     for _, neighbor, key, data in list(graph.edges(v, data=True, keys=True)):
+    #         graph.add_edge(u, neighbor, key=key, **data)
+    #     for neighbor, _, key, data in list(graph.in_edges(v, data=True, keys=True)):
+    #         graph.add_edge(neighbor, u, key=key, **data)
+    #     graph.remove_node(v)
 
     # add additional resistor between voltage source and node
     edges_to_insert = []

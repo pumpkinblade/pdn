@@ -1,6 +1,4 @@
-import networkx as nx
 import scipy
-import re
 import numpy as np
 from enum import IntEnum
 
@@ -140,6 +138,9 @@ class OpCircuit(object):
         )
         self.G[G_uv_unique[0], G_uv_unique[1]] -= G_uv_unique_value
         self.G[G_uv_unique[1], G_uv_unique[0]] -= G_uv_unique_value
+        if np.sum(G_u_index >= 0) + np.sum(G_v_index >= 0) > 0:
+            self.LU = None
+            self.V = None
 
         # for i, val in zip(index, value):
         #     uid = self.branch_u[i] - 1

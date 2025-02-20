@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-from circuit import OpBranchType, OpCircuit
 
 
 class OpSolveFunction(torch.autograd.Function):
@@ -9,9 +8,12 @@ class OpSolveFunction(torch.autograd.Function):
         """ "
         @brief forward
         @param ctx
-        @param can the value for candidate branches
+        @param can the conductance value for candidate branches
         @param can_index the index for candidate branches
-        @param obs_index the index for observation branches
+        @param exc the excitcation value for voltage and current branches
+        @param exc_index the index for voltage and current branches
+        @param vol_obs_index the index for the observed voltage
+        @param cur_obs_index the index for the observed current
         """
 
         # update branches value
@@ -41,7 +43,8 @@ class OpSolveFunction(torch.autograd.Function):
         """
         @brief backward
         @param ctx
-        @param grad_output the gradient for the observed voltage or current
+        @param vol_grad the gradient for the observed voltage
+        @param cur_grad the gradient for the observed current
         """
 
         can_index = ctx.can_index

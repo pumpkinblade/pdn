@@ -5,7 +5,7 @@ import parse
 import solve
 
 
-file = "draft6.sp"
+file = "gcd_nangate45_vdd_full.sp"
 graph = parse.networkx_from_spice(file)
 parse.process_openroad(graph)
 ckt = parse.opcircuit_from_networkx(graph)
@@ -22,19 +22,21 @@ weight_total_drop = 1.0
 weight_count = 1.0
 gamma = 1e-7
 conductance = 1000.0
-vdd = 1.8
+vdd = 1.1
 
 # parameters
 q = nn.Parameter(torch.rand(len(can_index)))
 param_list = nn.ParameterList([q])
 
-# iterations
-niters = 100
-
 # optimizer
 optimizer = torch.optim.SGD(param_list, lr=0.01)
+# optimizer = torch.optim.Adam(param_list)
+
+# iterations
+niters = 500
 
 for iter in range(niters):
+    optimizer.zero_grad()
     p = torch.sigmoid(q)
     can = conductance * p
     vol_obs, cur_obs = solve.OpSolveFunction.apply(
@@ -56,3 +58,4 @@ for iter in range(niters):
             iter, loss, torch.max(ir_drop), total_drop, count
         )
     )
+print(p.detach().numpy())
